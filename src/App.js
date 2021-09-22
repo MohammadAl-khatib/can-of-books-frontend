@@ -3,6 +3,7 @@ import BestBooks from "./BestBooks";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Form from "./components/Form";
 import axios from "axios";
+import UpdateForm from "./components/UpdateForm";
 
 export class App extends Component {
   constructor(props) {
@@ -16,12 +17,15 @@ export class App extends Component {
       showdata: true,
       errorMessage: "book collection is empty",
       showError: false,
+      bookid: "",
+      showUpdateForm: false,
+      showAddForm: true,
     };
   }
 
   componentDidMount = () => {
     axios
-      .get("http://localhost:8020/books")
+      .get(`${process.env.REACT_APP_BACKEND_PORT}/books`)
       .then((res) => {
         this.setState({
           data: res.data,
@@ -37,7 +41,7 @@ export class App extends Component {
 
   postBook = () =>
     axios
-      .post("http://localhost:8020/create-book", {
+      .post(`${process.env.REACT_APP_BACKEND_PORT}/create-book`, {
         title: `${this.state.formTitle}`,
         description: `${this.state.formDescription}`,
         status: `${this.state.formStatus}`,
@@ -50,11 +54,41 @@ export class App extends Component {
       });
 
   deleteBook = (id) => {
-    axios.delete(`http://localhost:8020/delete-book/${id}`).then(res=>{
+    axios.delete(`${process.env.REACT_APP_BACKEND_PORT}/delete-book/${id}`).then((res) => {
       this.setState({
         data: res.data,
       });
     });
+  };
+
+  updateBook = (id, title, description, status, email) => {
+    this.setState({
+      bookid: id,
+      showUpdateForm: true,
+      showAddForm: false,
+    });
+  };
+  handleUpdateBook = () => {
+    axios
+      .put(`${process.env.REACT_APP_BACKEND_PORT}/update-book/${this.state.bookid}`, {
+        title: `${this.state.formTitle}`,
+        description: `${this.state.formDescription}`,
+        status: `${this.state.formStatus}`,
+        email: `${this.state.formEmail}`,
+      })
+      .then((res) => {
+        this.setState({
+          data: res.data,
+          showUpdateForm: false,
+          showAddForm: true,
+        });
+      });
+    console.log("dasdasdasda");
+  };
+
+  handleUpdateSubmit = (e) => {
+    e.preventDefault();
+    this.handleUpdateBook();
   };
 
   handleTitle = (e) => {
@@ -89,19 +123,31 @@ export class App extends Component {
   render() {
     return (
       <div>
-        <Form
-          handleTitle={this.handleTitle}
-          handleDescription={this.handleDescription}
-          handleStatus={this.handleStatus}
-          handleEmail={this.handleEmail}
-          handleSubmit={this.handleSubmit}
-        />
+        {this.state.showAddForm && (
+          <Form
+            handleTitle={this.handleTitle}
+            handleDescription={this.handleDescription}
+            handleStatus={this.handleStatus}
+            handleEmail={this.handleEmail}
+            handleSubmit={this.handleSubmit}
+          />
+        )}
+        {this.state.showUpdateForm && (
+          <UpdateForm
+            handleTitle={this.handleTitle}
+            handleDescription={this.handleDescription}
+            handleStatus={this.handleStatus}
+            handleEmail={this.handleEmail}
+            handleUpdateSubmit={this.handleUpdateSubmit}
+          />
+        )}
         <BestBooks
           data={this.state.data}
           showdata={this.state.showdata}
           errorMessage={this.state.errorMessage}
           showError={this.state.showError}
           deleteBook={this.deleteBook}
+          updateBook={this.updateBook}
         />
       </div>
     );

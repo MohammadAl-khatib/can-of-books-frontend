@@ -5,9 +5,9 @@ import { Auth0Provider } from "@auth0/auth0-react";
 
 ReactDOM.render(
   <Auth0Provider
-    domain="dev-35i0ibe7.us.auth0.com"
-    clientId="uqSOedMRIEudQUlX7dc3HoieE9F76fUn"
-    redirectUri="https://can-of-books-exercise.netlify.app/"
+    domain={process.env.REACT_APP_AUTH0_DOMAIN}
+    clientId={process.env.REACT_APP_AUTH0_CLIENTID}
+    redirectUri={`${process.env.REACT_APP_AUTH0_PORT}`}
   >
     <App />
   </Auth0Provider>,

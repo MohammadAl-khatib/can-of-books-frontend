@@ -1,4 +1,3 @@
-import axios from "axios";
 import React, { Component } from "react";
 
 class BestBooks extends Component {
@@ -15,6 +14,7 @@ class BestBooks extends Component {
                     <h5> {item.status}</h5>
                     <h5> {item.email}</h5>
                     <button onClick = {()=>this.props.deleteBook(item._id)}>Remove</button>
+                    <button onClick = {()=>this.props.updateBook(item._id,item.title,item.description,item.status,item.email)}>Update</button>
                     <br />
                     <hr />
                   </>

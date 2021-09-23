@@ -6,8 +6,10 @@ import axios from "axios";
 import UpdateForm from "./components/UpdateForm";
 import LoginButton from "./components/LoginButton";
 import LogoutButton from "./components/LogoutButton";
-import { withAuth0 } from '@auth0/auth0-react';
-
+import { withAuth0 } from "@auth0/auth0-react";
+import Profile from "./components/Profile";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import Nav from "./components/Nav";
 
 export class App extends Component {
   constructor(props) {
@@ -26,7 +28,6 @@ export class App extends Component {
       showAddForm: true,
     };
   }
-
   componentDidMount = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_PORT}/books`)
@@ -58,11 +59,13 @@ export class App extends Component {
       });
 
   deleteBook = (id) => {
-    axios.delete(`${process.env.REACT_APP_BACKEND_PORT}/delete-book/${id}`).then((res) => {
-      this.setState({
-        data: res.data,
+    axios
+      .delete(`${process.env.REACT_APP_BACKEND_PORT}/delete-book/${id}`)
+      .then((res) => {
+        this.setState({
+          data: res.data,
+        });
       });
-    });
   };
 
   updateBook = (id, title, description, status, email) => {
@@ -74,12 +77,15 @@ export class App extends Component {
   };
   handleUpdateBook = () => {
     axios
-      .put(`${process.env.REACT_APP_BACKEND_PORT}/update-book/${this.state.bookid}`, {
-        title: `${this.state.formTitle}`,
-        description: `${this.state.formDescription}`,
-        status: `${this.state.formStatus}`,
-        email: `${this.state.formEmail}`,
-      })
+      .put(
+        `${process.env.REACT_APP_BACKEND_PORT}/update-book/${this.state.bookid}`,
+        {
+          title: `${this.state.formTitle}`,
+          description: `${this.state.formDescription}`,
+          status: `${this.state.formStatus}`,
+          email: `${this.state.formEmail}`,
+        }
+      )
       .then((res) => {
         this.setState({
           data: res.data,
@@ -87,7 +93,6 @@ export class App extends Component {
           showAddForm: true,
         });
       });
-    console.log("dasdasdasda");
   };
 
   handleUpdateSubmit = (e) => {
@@ -126,38 +131,61 @@ export class App extends Component {
 
   render() {
     return (
-      <div>
-        <LoginButton/>
-        <LogoutButton/>
-        {this.state.showAddForm && (
-          <Form
-            handleTitle={this.handleTitle}
-            handleDescription={this.handleDescription}
-            handleStatus={this.handleStatus}
-            handleEmail={this.handleEmail}
-            handleSubmit={this.handleSubmit}
-          />
-        )}
-        {this.state.showUpdateForm && (
-          <UpdateForm
-            handleTitle={this.handleTitle}
-            handleDescription={this.handleDescription}
-            handleStatus={this.handleStatus}
-            handleEmail={this.handleEmail}
-            handleUpdateSubmit={this.handleUpdateSubmit}
-          />
-        )}
-        <BestBooks
-          data={this.state.data}
-          showdata={this.state.showdata}
-          errorMessage={this.state.errorMessage}
-          showError={this.state.showError}
-          deleteBook={this.deleteBook}
-          updateBook={this.updateBook}
-        />
-      </div>
+      <Router>
+        <Switch>
+          <Route exact path="/profile">
+            {this.props.auth0.isAuthenticated && (
+              <Profile
+                name={this.props.auth0.user.name}
+                email={this.props.auth0.user.email}
+              />
+            )}
+          </Route>
+          <Route exact path="/">
+            {this.props.auth0.isAuthenticated && <Nav/>}
+            {this.props.auth0.isAuthenticated && (
+              <>
+                <LogoutButton />
+              </>
+            )}
+            {!this.props.auth0.isAuthenticated && (
+              <>
+                <LoginButton />
+              </>
+            )}
+            {this.state.showAddForm && this.props.auth0.isAuthenticated && (
+              <Form
+                handleTitle={this.handleTitle}
+                handleDescription={this.handleDescription}
+                handleStatus={this.handleStatus}
+                handleEmail={this.handleEmail}
+                handleSubmit={this.handleSubmit}
+              />
+            )}
+            {this.state.showUpdateForm && (
+              <UpdateForm
+                handleTitle={this.handleTitle}
+                handleDescription={this.handleDescription}
+                handleStatus={this.handleStatus}
+                handleEmail={this.handleEmail}
+                handleUpdateSubmit={this.handleUpdateSubmit}
+              />
+            )}
+            {this.props.auth0.isAuthenticated && (
+              <BestBooks
+                data={this.state.data}
+                showdata={this.state.showdata}
+                errorMessage={this.state.errorMessage}
+                showError={this.state.showError}
+                deleteBook={this.deleteBook}
+                updateBook={this.updateBook}
+              />
+            )}
+          </Route>
+        </Switch>
+      </Router>
     );
   }
 }
 
-export default withAuth0 (App);
+export default withAuth0(App);

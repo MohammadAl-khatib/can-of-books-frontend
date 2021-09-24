@@ -5,7 +5,8 @@ class Profile extends Component {
         return (
             <>
                <h3>{this.props.name}</h3> 
-               <h3>{this.props.email}</h3> 
+               <h3>{this.props.email}</h3>
+               <img src = {this.props.picture} alt = "personal profile"/>
             </>
         )
     }

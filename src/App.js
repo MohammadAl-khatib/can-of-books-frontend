@@ -28,6 +28,7 @@ export class App extends Component {
       showAddForm: true,
     };
   }
+
   componentDidMount = () => {
     axios
       .get(`${process.env.REACT_APP_BACKEND_PORT}/books`)
@@ -58,7 +59,8 @@ export class App extends Component {
         });
       });
 
-  deleteBook = (id) => {
+  deleteBook = (e,id) => {
+    e.preventDefault();
     axios
       .delete(`${process.env.REACT_APP_BACKEND_PORT}/delete-book/${id}`)
       .then((res) => {
@@ -68,17 +70,14 @@ export class App extends Component {
       });
   };
 
-  updateBook = (id, title, description, status, email) => {
-    this.setState({
-      bookid: id,
-      showUpdateForm: true,
-      showAddForm: false,
-    });
+  updateBook = async (e,id) => {
+    e.preventDefault();
+    await this.handleUpdateBook(id); 
   };
-  handleUpdateBook = () => {
+  handleUpdateBook = (id) => {
     axios
       .put(
-        `${process.env.REACT_APP_BACKEND_PORT}/update-book/${this.state.bookid}`,
+        `${process.env.REACT_APP_BACKEND_PORT}/update-book/${id}`,
         {
           title: `${this.state.formTitle}`,
           description: `${this.state.formDescription}`,
@@ -86,7 +85,7 @@ export class App extends Component {
           email: `${this.state.formEmail}`,
         }
       )
-      .then((res) => {
+      .then( (res) => {
         this.setState({
           data: res.data,
           showUpdateForm: false,
@@ -94,12 +93,6 @@ export class App extends Component {
         });
       });
   };
-
-  handleUpdateSubmit = (e) => {
-    e.preventDefault();
-    this.handleUpdateBook();
-  };
-
   handleTitle = (e) => {
     this.setState({
       formTitle: e.target.value,
@@ -138,13 +131,14 @@ export class App extends Component {
               <Profile
                 name={this.props.auth0.user.name}
                 email={this.props.auth0.user.email}
+                picture = {this.props.auth0.user.picture}
               />
             )}
           </Route>
           <Route exact path="/">
-            {this.props.auth0.isAuthenticated && <Nav/>}
             {this.props.auth0.isAuthenticated && (
               <>
+                {this.props.auth0.isAuthenticated && <Nav />}
                 <LogoutButton />
               </>
             )}
@@ -179,6 +173,8 @@ export class App extends Component {
                 showError={this.state.showError}
                 deleteBook={this.deleteBook}
                 updateBook={this.updateBook}
+                handleTitle={this.handleTitle}
+                handleDescription={this.handleDescription}
               />
             )}
           </Route>
